@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<link rel="icon" href="data:,">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Ticket Booking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <style>
+    body {
+      
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #6e8efb, #a777e3, #fc6076, #ff9a44);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+
+    body.dark-mode {
+      background: #121212;
+      color: #fff;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .overlay-content {
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease;
+    }
+
+    body.dark-mode .overlay-content {
+      background-color: rgba(33, 33, 33, 0.95);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .form-title {
+      text-align: center;
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #6f42c1;
+    }
+
+    .form-label {
+      font-weight: 600;
+    }
+
+    .form-control, .form-select {
+      border-radius: 10px;
+    }
+
+    .btn-primary {
+      background-color: #6f42c1;
+      border: none;
+      padding: 12px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+    }
+
+    .btn-primary:hover {
+      background-color: #5a379f;
+      transform: scale(1.02);
+    }
+
+    .event-card {
+      border: none;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .event-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .event-card img {
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .ratings {
+      color: #f5c518;
+      font-size: 1rem;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      border-radius: 12px;
+    }
+
+    .dark-mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+    }
+
+    #loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #loader div {
+      width: 50px;
+      height: 50px;
+      border: 5px solid white;
+      border-top: 5px solid #6f42c1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .seat-map {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .seat {
+      width: 30px;
+      height: 30px;
+      background-color: #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .seat.selected {
+      background-color: #6f42c1;
+    }
+
+    .seat.occupied {
+      background-color: #444;
+      cursor: not-allowed;
+    }
+  </style>
+
+</head>
+<body>
+
+ <div class="position-absolute top-0 start-0 m-3">
+  <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-2/512/ticket-icon.png" alt="Tap In Logo" style="height: 120px;">
+</div>
+
+
+
+<!-- Dark Mode + My Bookings Link Together -->
+<div class="position-absolute top-0 end-0 m-3 d-flex align-items-center gap-2">
+  <a href="my_bookings.html" class="btn btn-secondary">My Bookings</a>
+  <button class="btn btn-sm btn-dark" 
+    onClick="document.body.classList.toggle('dark-mode')">
+    🌓 Toggle Dark Mode
+  </button>
+</div>
+
+
+<div id="loader"><div></div></div>
+
+<div class="text-center mt-5">
+  <h1 class="fw-bold text-white display-2">TAP IN  <img src="https://icons.iconarchive.com/icons/custom-icon-design/flatastic-2/512/ticket-icon.png" alt="Tap In Logo" style="height: 77px;"></h1>
+  <p class="text-light" style="font-size: 1.5rem;">Book your favorite events across India – from live concerts to vibrant festivals!</p>
+
+</div>
+
+<!-- Container for events dynamically generated later -->
+<div class="container mt-4">
+  <div class="row g-4 justify-content-center" id="eventList"></div>
+</div>
+
+<div class="form-container mt-5" id="bookingFormContainer" style="display:none;">
+
+  <div class="overlay-content">
+    <h2 class="form-title">🎫 Book Your Event Ticket</h2>
+    <form id="bookingForm">
+
+   <div class="mb-3">
+    <label for="name" class="form-label">Full Name</label>
+    <input type="text" class="form-control" id="name" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input type="email" class="form-control" id="email" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="phone" class="form-label">Phone Number</label>
+    <input type="tel" class="form-control" id="phone" pattern="[0-9]{10}" required placeholder="10-digit number">
+  </div>
+
+
+
+  <div class="mb-3">
+    <label for="eventName" class="form-label">Select Event</label>
+    <select class="form-select" id="eventName" required></select>
+  </div>
+
+
+      <div class="mb-3 text-center">
+  <div
+    style="
+      margin-bottom: 10px;
+      width: 300px;
+      height: 30px;
+      background: #444;
+      color: white;
+      border-radius: 8px;
+      line-height: 30px;
+      font-weight: 700;
+      margin-left: auto;
+      margin-right: auto;
+      user-select: none;
+    "
+  >
+    STAGE
+  </div>
+  <div class="seat-map" id="seatMap"></div>
+</div>
+
+
+      <div class="mb-3">
+        <label for="quantity" class="form-label">Selected Seats Count</label>
+        <input type="number" class="form-control" id="quantity" value="0" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label for="amount" class="form-label">Total Price (₹)</label>
+        <input type="number" class="form-control" id="amount" readonly>
+      </div>
+  <div class="mb-3">
+    <label for="payment" class="form-label">Payment Method</label>
+    <select class="form-select" id="payment" required>
+      <option value="" disabled selected>Select a payment method</option>
+      <option value="UPI">UPI</option>
+      <option value="Credit Card">Credit Card</option>
+      <option value="Debit Card">Debit Card</option>
+      <option value="Net Banking">Net Banking</option>
+      <option value="Wallet">Wallet</option>
+    </select>
+  </div>
+
+      <button type="submit" class="btn btn-primary w-100">Book Now</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <h5 class="fw-bold">🎉 BOOKING CONFIRMED!</h5>
+        <p>Thank you for booking with TAP IN.</p>
+        <p>Our team will contact you shortly with payment and booking details via email.</p>
+        <button class="btn btn-danger mt-2" onclick="cancelBooking()">❌ Cancel Booking</button>
+        <button class="btn btn-success" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- NOTE: This is the continuation of your provided code with the modified seat ID logic -->
+<script>
+const events = [{
+    name: "Tech & Innovation Summit",
+    price: 1499,
+    image: "https://droomdroom.com/wp-content/uploads/2023/05/Tech-Summit-23.jpg",
+    description: "Join the brightest minds in tech at the Tech & Innovation Summit. Discover breakthroughs in AI, blockchain, cybersecurity, and cloud computing. Enjoy panels, workshops, and a startup pitch fest.",
+    email: "support-tech@tapin.in",
+    phone: "+91-9112237654",
+    location: "Hyderabad",
+    rating: 4.5
+  },
+  {
+    name: "Ed Sheeran Concert",
+    price: 2999,
+    image: "https://m.economictimes.com/thumb/msid-104632583,width-1200,height-1200,resizemode-4,imgsize-100092/ed-sheeran-2024-mathematics-asia-tour-tickets-dates-venues-and-more.jpg",
+    description: "Don’t miss Ed Sheeran live in Mumbai! Sing along to 'Shape of You' and 'Perfect'. Enjoy an unforgettable evening of music, lights, and energy.",
+    email: "support-ed@tapin.in",
+    phone: "+91-9114455445",
+    location: "Delhi",
+    rating: 4.2
+  },
+  {
+    name: "Art & Culture Festival",
+    price: 999,
+    image: "https://miro.medium.com/max/960/1*8NSCzeT91w52QfFSpMYaVw.jpeg",
+    description: "Celebrate the rich tapestry of Indian heritage with folk dances, artisan exhibits, traditional cuisine, and cultural parades.",
+    email: "support-art@tapin.in",
+    phone: "+91-9123233445",
+    location: "Lucknow",
+    rating: 3.9
+  },
+  {
+    name: "Singing Under the Stars",
+    price: 1299,
+    image: "https://cdn.wallpapersafari.com/54/21/kPYiSO.jpg",
+    description: "A magical evening of live acoustic and vocal performances under the night sky. Bring your friends, blankets, and enjoy soulful melodies beneath the stars.",
+    email: "support-singing@tapin.in",
+    phone: "+91-9112238885",
+    location: "Bangalore",
+    rating: 4.4
+  },
+  {
+    name: "Laugh Now",
+    price: 799,
+    image: "https://cdn2.vectorstock.com/i/1000x1000/06/51/stand-up-comedy-microphone-vector-17200651.jpg",
+    description: "An epic comedy night featuring India's top stand-up artists. Guaranteed belly laughs, hilarious stories, and a break from your daily grind.",
+    email: "support-comedy@tapin.in",
+    phone: "+91-9114563445",
+    location: "Mumbai",
+    rating: 4.8
+  },
+   {
+    name: "Bollywood Dance Night",
+    price: 1199,
+    image: "https://static.vecteezy.com/system/resources/previews/029/332/148/large_2x/ai-generative-dj-playing-and-mixing-music-in-nightclub-party-at-night-edm-dance-music-club-with-crowd-of-young-people-free-photo.jpg",
+    description: "Dance to Bollywood beats all night!",
+    email: "support-dance@tapin.in",
+    phone: "+91-9112233445",
+    location: "Pune",
+    rating: 4.3
+  },
+  {
+    name: "Food Truck Festival",
+    price: 499,
+    image: "https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781481465212/food-trucks-9781481465212_hr.jpg",
+    description: "Tasty treats from India's top food trucks.",
+    email: "support-food@tapin.in",
+    phone: "+91-9223344556",
+    location: "Ahmedabad",
+    rating: 4.2
+  },
+  {
+    name: "Startup Expo 2025",
+    price: 1999,
+    image: "https://d8it4huxumps7.cloudfront.net/uploads/images/opportunity/mobile_banner/65945b61e0eaa_central-indias-largest-startup-expo-24.jpg",
+    description: "Meet founders and pitch your ideas.",
+    email: "support-startup@tapin.in",
+    phone: "+91-9334455667",
+    location: "Hyderabad",
+    rating: 4.4
+  },
+  {
+    name: "Literature Fest",
+    price: 899,
+    image: "https://wallpaperaccess.com/full/2342277.jpg",
+    description: "Celebrating authors and poets of India.",
+    email: "support-lit@tapin.in",
+    phone: "+91-9445566778",
+    location: "Kolkata",
+    rating: 4.5
+  },
+  {
+    name: "Yoga & Wellness Retreat",
+    price: 1599,
+    image: "https://tse3.mm.bing.net/th?id=OIP.qXcgDWXBzNis605Y_rd25QHaE7&pid=Api&P=0&h=220",
+    description: "Relax and rejuvenate with nature.",
+    email: "support-yoga@tapin.in",
+    phone: "+91-9556677889",
+    location: "Rishikesh",
+    rating: 4.6
+  }];
+
+const eventSelect = document.getElementById('eventName');
+const quantityInput = document.getElementById('quantity');
+const amountInput = document.getElementById('amount');
+const seatMap = document.getElementById('seatMap');
+const loader = document.getElementById('loader');
+const eventList = document.getElementById('eventList');
+
+let currentPrice = 0;
+let currentEvent = "";
+
+function updatePrice() {
+  const count = document.querySelectorAll('.seat.selected').length;
+  quantityInput.value = count;
+  amountInput.value = count * currentPrice;
+}
+
+function renderEvents() {
+  events.forEach(evt => {
+    const col = document.createElement('div');
+    col.className = 'col-md-4';
+
+    // Function to generate star rating HTML (full, half, empty stars)
+    function getStarRatingHTML(rating) {
+      let fullStars = Math.floor(rating);
+      let halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
+      let emptyStars = 5 - fullStars - halfStar;
+      let starsHTML = '';
+      for(let i=0; i<fullStars; i++) starsHTML += '<i class="fas fa-star"></i>';
+      if(halfStar) starsHTML += '<i class="fas fa-star-half-alt"></i>';
+      for(let i=0; i<emptyStars; i++) starsHTML += '<i class="far fa-star"></i>';
+      return starsHTML;
+    }
+
+    col.innerHTML = `
+  <div class="card event-card" data-name="${evt.name}" data-price="${evt.price}" data-description="${evt.description}" data-email="${evt.email}">
+    <img src="${evt.image}" class="card-img-top" alt="${evt.name}" />
+    <div class="card-body">
+      <h5 class="card-title">${evt.name}</h5>
+      <p class="card-text">${evt.description}</p>
+      <div class="ratings mb-2">
+        ${getStarRatingHTML(evt.rating)} <span>(${evt.rating.toFixed(1)})</span>
+      </div>
+      <p class="text-success fw-semibold">₹${evt.price}</p>
+      <p class="mb-1"><strong>📞 ${evt.phone}</strong></p>
+      <small>Contact: <a href="mailto:${evt.email}">${evt.email}</a></small>
+      <p class="mt-2"><i class="fas fa-map-marker-alt"></i> ${evt.location}, India</p>
+      <button class="btn btn-primary w-100 mt-3 book-now-btn">Book Now</button>
+    </div>
+  </div>
+  `;
+
+
+    eventList.appendChild(col);
+
+    const option = document.createElement('option');
+    option.value = evt.name;
+    option.textContent = evt.name;
+    option.setAttribute('data-price', evt.price);
+    eventSelect.appendChild(option);
+
+    col.querySelector('.book-now-btn').addEventListener('click', () => {
+      eventSelect.value = evt.name;
+      eventSelect.dispatchEvent(new Event('change'));
+      document.getElementById('bookingFormContainer').style.display = 'block';
+      document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+}
+
+
+
+function getEventAbbreviation(name) {
+  return name.split(/\s+/).map(word => word[0]).join('').toUpperCase().substring(0, 4);
+}
+
+function renderSeats() {
+  seatMap.innerHTML = '';
+  const abbrev = getEventAbbreviation(currentEvent || 'GEN');
+
+  for (let i = 1; i <= 30; i++) {
+    const seatID = `Seat-${abbrev}-${i}`;
+    const seat = document.createElement('div');
+    seat.className = 'seat';
+    seat.title = seatID;
+    seat.setAttribute('data-seat-id', seatID);
+    seat.textContent = i;
+
+    if (Math.random() < 0.2) seat.classList.add('occupied');
+
+    seat.addEventListener('click', () => {
+      if (!seat.classList.contains('occupied')) {
+        seat.classList.toggle('selected');
+        updatePrice();
+      }
+    });
+
+    seatMap.appendChild(seat);
+  }
+}
+
+
+
+
+document.getElementById("bookingForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    loader.style.display = "flex"; // Show loader while processing
+
+    // Ensure all required fields exist
+    const nameField = document.getElementById("name");
+    const eventField = document.getElementById("eventName");
+    const emailField = document.getElementById("email");
+    const phoneField = document.getElementById("phone");
+    const paymentField = document.getElementById("payment");
+
+    console.log("Checking eventName:", eventField); // Debugging
+
+    if (!nameField || !eventField || !emailField || !phoneField || !paymentField) {
+        console.error("One or more required fields are missing!");
+        alert("Please fill in all required fields.");
+        loader.style.display = "none"; // Stop loader to prevent infinite loading
+        return;
+    }
+
+    const selectedSeats = Array.from(document.querySelectorAll(".seat.selected"))
+        .map(seat => seat.getAttribute("data-seat-id"))
+        .join(", ");
+
+    // Ensure seats are selected before proceeding
+    if (!selectedSeats) {
+        alert("Please select at least one seat.");
+        loader.style.display = "none";
+        return;
+    }
+
+    const bookingData = {
+        event: eventField.value,
+        name: nameField.value,
+        email: emailField.value,
+        phone: phoneField.value,
+        seats: selectedSeats,
+        payment: paymentField.value
+    };
+
+    try {
+    const response = await fetch("http://localhost:3000/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData)
+    });
+
+    loader.style.display = "none"; // Hide loader after request
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        alert("Booking failed: " + result.message);
+        console.error("Error:", result);
+        return;
+    }
+
+    console.log("✅ Booking successful!");
+    new bootstrap.Modal(document.getElementById("bookingModal")).show();
+
+    // Clear form & UI
+    document.getElementById("bookingForm").reset();
+    document.getElementById("seatMap").innerHTML = '';
+    document.getElementById("quantity").value = 0;
+    document.getElementById("amount").value = 0;
+} catch (error) {
+    loader.style.display = "none";
+    alert("Server error. Please try again later.");
+    console.error("Booking Error:", error);
+}
+});
+
+
+
+
+eventSelect.addEventListener('change', function() {
+  const selectedOption = this.options[this.selectedIndex];
+  currentEvent = selectedOption.value;
+  currentPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+  updatePrice();
+  renderSeats();
+});
+// Your cancelBooking function
+function cancelBooking() {
+  // Clear the form and UI
+  document.getElementById("bookingForm").reset();
+  document.getElementById("seatMap").innerHTML = '';
+  document.getElementById("quantity").value = 0;
+  document.getElementById("amount").value = 0;
+
+  // Close modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById("bookingModal"));
+  if (modal) modal.hide();
+
+  alert("Booking cancelled.");
+}
+
+window.onload = () => {
+  renderEvents();
+  renderSeats();
+};
+</script>
+
+
+
+
+
+
+
+</body>
+</html>

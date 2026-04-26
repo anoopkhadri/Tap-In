@@ -1,0 +1,32 @@
+{
+  "name": "event-booking-app",
+  "version": "1.0.0",
+  "description": "![image](https://github.com/user-attachments/assets/290b80f7-ef69-44b4-9373-ca42a7018fe6)\r ![image](https://github.com/user-attachments/assets/31c85c87-6737-48c4-9ead-8fe2825da329)\r ![image](https://github.com/user-attachments/assets/755deb49-f289-4ace-9eaa-c86eddf8580e)\r ![image](https://github.com/user-attachments/assets/56b42d4e-f9d8-4f92-9c6b-4081eb9ae2ad)\r ![image](https://github.com/user-attachments/assets/f7045be1-8cc6-4513-ba75-d2550e050edd)\r ![image](https://github.com/user-attachments/assets/0749f3c2-7632-4c39-afff-44180c3c3691)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnishKN05/event-booking-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AnishKN05/event-booking-app/issues"
+  },
+  "homepage": "https://github.com/AnishKN05/event-booking-app#readme"
+}
